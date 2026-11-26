@@ -24,7 +24,9 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: 'tools platform-tools platforms;android-34 build-tools;34.0.0'
+          accept-android-sdk-licenses: true
+          # Jangan minta paket 'tools' yang sudah dihapus
+          packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew || true
@@ -33,18 +35,20 @@ jobs:
         run: |
           echo "=== Isi root ==="
           ls -la
+          echo ""
           echo "=== Cek gradlew ==="
-          ls -la gradlew || echo "gradlew TIDAK ADA"
+          ls -la gradlew 2>/dev/null || echo "❌ gradlew TIDAK ADA"
+          echo ""
           echo "=== Cek folder app ==="
-          ls -la app || echo "folder app TIDAK ADA"
+          ls -la app 2>/dev/null || echo "❌ folder app TIDAK ADA"
 
       - name: Build Debug APK
         run: |
           if [ -f "./gradlew" ]; then
             ./gradlew assembleDebug --stacktrace
           else
-            echo "❌ Project Android belum lengkap (tidak ada gradlew)"
-            echo "Silakan upload source code lengkap dulu."
+            echo "❌ Project Android belum lengkap."
+            echo "Upload source code lengkap dulu (harus ada file gradlew)."
             exit 1
           fi
 
