@@ -5,7 +5,7 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  workflow_dispatch:   # biar bisa dijalankan manual juga
+  workflow_dispatch:
 
 jobs:
   build:
@@ -23,20 +23,33 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          packages: 'tools platform-tools platforms;android-34 build-tools;34.0.0'
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew || true
 
+      - name: Check project structure
+        run: |
+          echo "=== Isi root ==="
+          ls -la
+          echo "=== Cek gradlew ==="
+          ls -la gradlew || echo "gradlew TIDAK ADA"
+          echo "=== Cek folder app ==="
+          ls -la app || echo "folder app TIDAK ADA"
+
       - name: Build Debug APK
         run: |
           if [ -f "./gradlew" ]; then
-            ./gradlew assembleDebug
+            ./gradlew assembleDebug --stacktrace
           else
-            echo "Tidak ada gradlew. Pastikan project Android sudah lengkap."
+            echo "❌ Project Android belum lengkap (tidak ada gradlew)"
+            echo "Silakan upload source code lengkap dulu."
             exit 1
           fi
 
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
